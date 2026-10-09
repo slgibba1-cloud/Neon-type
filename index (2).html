@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NeonType — Typing Trainer</title>
+<style>
+:root{color-scheme:dark;--bg:#080c16;--panel:#101827;--line:#263750;--cyan:#40ddff;--green:#4ef0a5;--red:#ff6482;--muted:#9aabc3}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 0,#16314f,transparent 55%),var(--bg);color:#edf5ff;font:16px/1.5 "Segoe UI",Arial,sans-serif}.wrap{max-width:1050px;margin:auto;padding:24px 16px}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:25px}.brand{font-size:24px;font-weight:900;letter-spacing:1px}.brand span{color:var(--cyan)}.sub{font-size:11px;letter-spacing:2px;color:var(--muted)}.status{color:var(--green);font-size:12px}
+h2{margin:0 0 6px;font-size:clamp(28px,5vw,42px)}.intro{color:var(--muted);margin:0 0 22px}.cyan{color:var(--cyan)}
+.layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(240px,1fr);gap:16px}.panel{background:linear-gradient(145deg,#121d2e,#0b1320);border:1px solid var(--line);border-radius:16px;padding:19px;min-width:0}.head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:15px}.head h3{font-size:15px;margin:0}.pill{font-size:11px;color:var(--cyan);border:1px solid #27536b;border-radius:7px;padding:4px 8px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}.stat{padding:10px;background:#0a111e;border:1px solid #202f45;border-radius:10px}.stat b{display:block;font-size:24px}.stat small{font-size:10px;letter-spacing:.8px;color:var(--muted)}
+.prompt{background:#080f1a;border:1px solid #26364c;border-radius:10px;padding:16px;min-height:110px;font-size:20px;line-height:1.9;overflow-wrap:anywhere;white-space:pre-wrap}.correct{color:var(--green)}.wrong{color:var(--red);background:#ff64821c}.current{background:#40ddff2a;border-bottom:2px solid var(--cyan)}.pending{color:#8494ad}
+label{display:block;color:var(--muted);font-size:12px;margin:14px 0 6px}.typing{display:block;width:100%;min-height:58px;resize:vertical;padding:13px;background:#080f1a;border:2px solid #344963;border-radius:10px;color:#fff;font:18px/1.5 "Segoe UI",Arial,sans-serif;outline:none}.typing:focus{border-color:var(--cyan);box-shadow:0 0 0 3px #40ddff18}.typing:disabled{opacity:.8}
+button{cursor:pointer;border-radius:9px;padding:10px 13px;font-weight:700}.primary{background:var(--cyan);border:1px solid var(--cyan);color:#07111b}.secondary{background:#142137;border:1px solid #2c405a;color:#eaf4ff}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px}.feedback{font-size:12px;color:var(--muted);min-height:18px}.bar{height:5px;background:#202d40;border-radius:8px;overflow:hidden}.bar div{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),#9b75ff)}
+.lesson-list{display:grid;gap:8px}.lesson{width:100%;display:flex;align-items:center;gap:10px;text-align:left;background:#0b1320;color:#edf5ff;border:1px solid #26364c;padding:11px}.lesson.active{border-color:var(--cyan);background:#102538}.num{display:grid;place-items:center;width:30px;height:30px;border-radius:8px;background:#18273c;color:var(--cyan)}.lesson strong{display:block;font-size:13px}.lesson small{color:var(--muted);font-size:11px}
+.keyboard{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px}.key{min-width:0;text-align:center;padding:7px 0;background:#142137;border:1px solid #2a3c55;border-radius:5px;color:#d3deed;font-size:11px}.key.next{color:var(--cyan);border-color:var(--cyan);box-shadow:0 0 10px #40ddff35}.key.space{grid-column:span 4}.tip{color:var(--muted);font-size:12px}footer{text-align:center;color:#687993;font-size:11px;margin-top:22px}
+@media(max-width:720px){.layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.status{display:none}.panel{padding:14px}.prompt{font-size:18px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><div><div class="brand">NEON<span>TYPE</span></div><div class="sub">TYPING LAB · STARTER EDITION</div></div><div class="status">● READY TO PRACTISE</div></header>
+<h2>Find your <span class="cyan">flow state.</span></h2>
+<p class="intro">Type the highlighted sentence. Accuracy first, speed second.</p>
+<div class="layout">
+<main class="panel">
+<div class="head"><h3 id="lessonTitle">Home row</h3><span class="pill" id="modeLabel">LESSON 1 / 5</span></div>
+<div class="stats"><div class="stat"><b class="cyan" id="wpm">0</b><small>WPM</small></div><div class="stat"><b class="green" id="accuracy">100%</b><small>ACCURACY</small></div><div class="stat"><b id="time">0s</b><small>TIME</small></div><div class="stat"><b style="color:var(--red)" id="mistakes">0</b><small>MISTAKES</small></div></div>
+<div id="prompt" class="prompt"></div>
+<label for="typingBox">CLICK THIS BOX, THEN TYPE THE SENTENCE</label>
+<textarea id="typingBox" class="typing" rows="2" placeholder="Click here and start typing…" spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+<div class="actions"><button class="primary" id="restart">↻ Restart</button><button class="secondary" id="next">Next lesson →</button><button class="secondary" id="speedTest">⚡ 60-second test</button></div>
+<div class="bar" style="margin-top:15px"><div id="progress"></div></div>
+<p class="feedback" id="feedback" aria-live="polite">Tip: Sit comfortably and keep your eyes on the sentence.</p>
+</main>
+<aside>
+<section class="panel"><div class="head"><h3>Lessons</h3><span class="sub">LEARN</span></div><div class="lesson-list" id="lessonList"></div></section>
+<section class="panel" style="margin-top:16px"><div class="head"><h3>Virtual keyboard</h3><span class="sub">QWERTY</span></div><div class="keyboard" id="keyboard"></div><p class="tip">The next key lights up in blue.</p></section>
+</aside>
+</div>
+<footer>NEONTYPE · v1.1 · Your typing is processed in this page.</footer>
+</div>
+<script>
+(function(){
+"use strict";
+var lessons=[
+ {name:"Home row",desc:"Beginner · A S D F",text:"asdf jkl; asdf jkl;"},
+ {name:"Easy words",desc:"Beginner · Short words",text:"ask a dad; fall; add a salad."},
+ {name:"Everyday words",desc:"Starter · Common words",text:"the sun is up and the day is bright."},
+ {name:"Short sentence",desc:"Practice · Punctuation",text:"I can type a little faster every day."},
+ {name:"Full sentence",desc:"Challenge · Accuracy",text:"Practice slowly, stay focused, and keep improving."}
+];
+var tests=["Good typing starts with calm hands and steady practice.","Small steps every day can lead to big improvements.","Focus on accuracy first, then build your typing speed.","The quick brown fox jumps over the lazy dog."];
+var index=0,mode="lesson",target="",startTime=null,ticker=null,done=false;
+function el(id){return document.getElementById(id)}
+var box=el("typingBox");
+function stop(){if(ticker!==null){clearInterval(ticker);ticker=null}}
+function chooseTarget(){return mode==="lesson"?lessons[index].text:tests[Math.floor(Math.random()*tests.length)]}
+function safeChar(c){if(c===" ")return "&nbsp;";if(c==="&")return "&amp;";if(c==="<")return "&lt;";if(c===">")return "&gt;";if(c==='"')return "&quot;";return c}
+function drawPrompt(){
+ var typed=box.value,html="";
+ for(var i=0;i<target.length;i++){
+  var cls=i<typed.length?(typed.charAt(i)===target.charAt(i)?"correct":"wrong"):(i===typed.length&&!done?"current":"pending");
+  html+='<span class="'+cls+'">'+safeChar(target.charAt(i))+'</span>';
+ }
+ el("prompt").innerHTML=html;
+ el("progress").style.width=Math.min(100,typed.length/target.length*100)+"%";
+}
+function stats(){
+ var typed=box.value,correct=0;
+ for(var i=0;i<typed.length;i++)if(typed.charAt(i)===target.charAt(i))correct++;
+ var seconds=startTime?Math.floor((Date.now()-startTime)/1000):0;
+ var mins=startTime?Math.max((Date.now()-startTime)/60000,1/60):1;
+ el("wpm").textContent=typed.length?Math.round((correct/5)/mins):0;
+ el("accuracy").textContent=(typed.length?Math.round(correct/typed.length*100):100)+"%";
+ el("time").textContent=mode==="test"?Math.max(0,60-seconds)+"s":seconds+"s";
+ el("mistakes").textContent=typed.length-correct;
+}
+function drawKeyboard(){
+ var keys="QWERTYUIOPASDFGHJKLZXCVBNM",html="",next=(box.value.length<target.length?target.charAt(box.value.length).toLowerCase():"");
+ for(var i=0;i<keys.length;i++){var k=keys.charAt(i);html+='<div class="key'+(next===k.toLowerCase()?" next":"")+'">'+k+'</div>'}
+ html+='<div class="key space'+(next===" "?" next":"")+'">SPACE</div>';
+ el("keyboard").innerHTML=html;
+}
+function drawLessons(){
+ var html="";
+ lessons.forEach(function(l,i){html+='<button class="lesson'+(mode==="lesson"&&i===index?" active":"")+'" data-index="'+i+'"><span class="num">0'+(i+1)+'</span><span><strong>'+l.name+'</strong><small>'+l.desc+'</small></span></button>'});
+ el("lessonList").innerHTML=html;
+ Array.prototype.forEach.call(el("lessonList").querySelectorAll("button"),function(b){b.addEventListener("click",function(){index=Number(b.getAttribute("data-index"));mode="lesson";reset()})});
+}
+function reset(){
+ stop();done=false;startTime=null;target=chooseTarget();box.value="";box.disabled=false;box.maxLength=mode==="lesson"?target.length:10000;
+ el("lessonTitle").textContent=mode==="lesson"?lessons[index].name:"60-second speed test";
+ el("modeLabel").textContent=mode==="lesson"?"LESSON "+(index+1)+" / "+lessons.length:"60-SECOND TEST";
+ el("next").style.display=mode==="lesson"?"inline-block":"none";
+ el("speedTest").textContent=mode==="test"?"↻ New speed test":"⚡ 60-second test";
+ el("feedback").textContent=mode==="lesson"?"Tip: Relax your hands and aim for accuracy first.":"You have 60 seconds. Type carefully to score higher.";
+ drawLessons();drawPrompt();stats();drawKeyboard();
+}
+function finishTest(){
+ stop();done=true;box.disabled=true;drawPrompt();stats();
+ el("feedback").textContent="Time is up! Final score: "+el("wpm").textContent+" WPM at "+el("accuracy").textContent+" accuracy. Click New speed test to try again.";
+}
+box.addEventListener("input",function(){
+ if(done)return;
+ if(box.value.length&&!startTime){startTime=Date.now();if(mode==="test"){ticker=setInterval(function(){stats();if(Date.now()-startTime>=60000)finishTest()},200)}else{ticker=setInterval(stats,300)}}
+ drawPrompt();stats();drawKeyboard();
+ if(mode==="lesson"&&box.value.length>=target.length){
+  stop();done=true;box.disabled=true;drawPrompt();
+  el("feedback").textContent=box.value===target?"Lesson complete! Great work — choose Next lesson.":"Finished! Some letters are incorrect. Press Restart and try again.";
+ }
+});
+el("restart").addEventListener("click",reset);
+el("next").addEventListener("click",function(){index=(index+1)%lessons.length;mode="lesson";reset()});
+el("speedTest").addEventListener("click",function(){mode="test";reset();box.focus()});
+document.querySelectorAll("button").forEach(function(b){b.addEventListener("click",function(){})});
+reset();
+})();
+</script>
+</body>
+</html>
